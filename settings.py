@@ -1,8 +1,8 @@
-import pygame
-
-class Window:
-    def __init__(self, width, height):
-        self.WIDTH = width
-        self.HEIGHT = height
-        print("Created window")
-        self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+#settings
+test_board = [#col 0, 1, 2
+                 [ 1, 1, 0 ],#row 0
+                 [ 0, 1, 1 ],#row 1
+                 [ 0, 0, 2 ] #row 2
+             ]
+test_coords = ( 1, 2 )
+test_current_player = 2
