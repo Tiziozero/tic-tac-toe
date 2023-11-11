@@ -1,5 +1,5 @@
 import logic
-
+#u suck dick bozo
 def miniMax(board, depth, p1) :  
     score = logic.check_win(board, None)
     if score[0] == 2:
