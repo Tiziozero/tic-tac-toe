@@ -21,10 +21,13 @@ def check_win( board, coords ):
         if board[0][col] == board[1][col] == board[2][col]:
             if board[0][col] != 0:
                 return board[0][col], False
-    if all(x != 0 for y in board for x in y):
-        print("Draw")
-        return 3, False
-    return 0, True
+
+    for row in board:
+        for element in row:
+            if element == 0:
+                return 0,  True
+
+    return 3, False
 
 def blit_board():
     for y in range(3):
@@ -84,7 +87,9 @@ def main_ai():
                 test_.test_current_player = 1
         winning_player, game_is_on = check_win(test_.test_board, (0,0))
         update_window()
-        
-    print(f"{winning_player} won") 
+    if winning_player == 3:
+        print("Draw")
+    elif winning_player == 1 or winning_player == 2:
+        print(f"{winning_player} won") 
     pygame.quit()
 
