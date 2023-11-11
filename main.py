@@ -5,7 +5,7 @@ mode = int(input("ai[0] or pvp[1]? "))
 
 pygame.init()
 
-if not mode:
-    ai_logic.main()
-else:
-    pvp_logic.main_ai()
+if mode == 0:
+    ai_logic.main_ai()
+elif mode == 1:
+    pvp_logic.main()
