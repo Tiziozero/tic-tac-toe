@@ -21,6 +21,9 @@ def check_win( board, coords ):
         if board[0][col] == board[1][col] == board[2][col]:
             if board[0][col] != 0:
                 return board[0][col], False
+    if all(x != 0 for y in board for x in y):
+        print("Draw")
+        return 3, False
     return 0, True
 
 def blit_board():
@@ -75,9 +78,10 @@ def main_ai():
         events()
 
         winning_player, game_is_on = check_win(test_.test_board, (0,0))
-        if test_.test_current_player == 2:
-            test_.test_board = TicTacToeAI.AI(test_.test_board)
-            test_.test_current_player = 1
+        if game_is_on:
+            if test_.test_current_player == 2:
+                test_.test_board = TicTacToeAI.AI(test_.test_board)
+                test_.test_current_player = 1
         winning_player, game_is_on = check_win(test_.test_board, (0,0))
         update_window()
         
