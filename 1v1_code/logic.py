@@ -1,5 +1,6 @@
 import pygame
 import settings
+import TicTacToeAI
 
 def check_win( board, coords ):
     for row in board:
@@ -63,6 +64,16 @@ def game_logic(pos, current_player):
             settings.test_current_player = 1
 
 def main():
+    winning_player = 0
+    game_is_on = True
+    while game_is_on:
+        events()
+        winning_player, game_is_on = check_win(settings.test_board, (0,0))
+        update_window()
+    print(f"{winning_player} won") 
+    pygame.quit()
+
+def main_ai():
     winning_player = 0
     game_is_on = True
     while game_is_on:
