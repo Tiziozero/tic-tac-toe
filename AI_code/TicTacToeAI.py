@@ -1,7 +1,7 @@
-import logic
+from ai_code import ai_logic
 #u suck dick bozo
 def miniMax(board, depth, p1) :  
-    score = logic.check_win(board, None)
+    score = ai_logic.check_win(board, None)
     if score[0] == 2:
         return 1
     elif score[0] == 1:
