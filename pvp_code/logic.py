@@ -1,6 +1,6 @@
 import pygame
-import settings
-import TicTacToeAI
+from pvp_code import settings
+#import TicTacToeAI
 
 def check_win( board, coords ):
     for row in board:
