@@ -4,7 +4,7 @@ import ast
 import TicTacToeAI
 import online_logic
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(("localhost", 8888))
+server.bind(("139.162.200.195", 8888))
 server.listen(5)
 
 
