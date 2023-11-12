@@ -3,8 +3,10 @@ import threading
 from typing import List
 import ast
 
+#client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_connection = ("localhost", 8888)
+server_connection = ("139.162.200.195", 8888)
 
 # funcs
 

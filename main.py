@@ -2,7 +2,7 @@ import pygame
 from test_dir import test_
 from pvp_code import pvp_logic
 from ai_code import ai_logic 
-from online_code import online_logic
+from online_code import online_ai_logic
 
 pygame.init()
 
@@ -31,13 +31,16 @@ while True:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
                 pvp_logic.main()
-                break
+                pygame.quit()
+                quit()
             elif event.key == pygame.K_b:
                 ai_logic.main_ai()
-                break
+                pygame.quit()
+                quit()
             elif event.key == pygame.K_c:
-                online_logic.main_online()
-                break
+                online_ai_logic.main_online()
+                pygame.quit()
+                quit()
     test_.window.blit(text_a, text_rect_a)
     test_.window.blit(text_b, text_rect_b)
     test_.window.blit(text_c, text_rect_c)
