@@ -4,16 +4,14 @@ import ast
 import TicTacToeAI
 import online_logic
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(("localhost", 8888))  # Use any available network interface and port 8888
-server.listen(5)  # Listen for up to 5 connections
+server.bind(("localhost", 8888))
+server.listen(5)
 
 
 def string_to_2d_array(input_str):
     try:
-        # Safely evaluate the string using ast.literal_eval
         array_2d = ast.literal_eval(input_str)
         
-        # Ensure the result is a list of lists
         if isinstance(array_2d, list) and all(isinstance(row, list) for row in array_2d):
             return array_2d
 
@@ -27,8 +25,20 @@ def table_to_str(table):
     return "[" + ",".join("[{}]".format(",".join(map(str, row))) for row in table) + "]"
 
 def handle_user_message(data) -> str:
-    
-    return table_to_str(TicTacToeAI.AI(string_to_2d_array(data)))
+    board = string_to_2d_array(data)
+    counter = 0
+    for r in range(0, 3):
+        for c in range(0, 3):
+            if board[r][c] == 0:
+                counter += 1
+    if counter == 1:
+        for r in range(0, 3):
+            for c in range(0, 3):
+                if board[r][c] == 0:
+                    board[r][c] = 2
+                    return table_to_str(board)
+    else:
+        return table_to_str(TicTacToeAI.AI(board))
 
 
 # Function to handle a client connection
