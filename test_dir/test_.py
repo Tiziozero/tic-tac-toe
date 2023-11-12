@@ -1,5 +1,7 @@
 import pygame
-window = pygame.display.set_mode((800, 500))
+
+WIDTH, HEIGHT = 800, 500
+window = pygame.display.set_mode((WIDTH, HEIGHT))
 
 b_image = pygame.image.load("graphics/board_1.jpg").convert_alpha()
 b_rect = b_image.get_rect(center=(400, 250))
