@@ -16,6 +16,7 @@ def setup():
     except socket.error as e:
         print(str(e))
         quit()
+    print("Set up")
 
 def table_to_str(table):
     return "[" + ",".join("[{}]".format(",".join(map(str, row))) for row in table) + "]"
@@ -58,3 +59,7 @@ def _test_func():
 
     finally:
         client_socket.close()
+
+if __name__ == '__main__':
+    setup()
+    _test_func()

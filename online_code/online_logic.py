@@ -2,6 +2,7 @@ import pygame
 from test_dir import test_
 #import TicTacToeAI
 from online_code import client_network
+test_.test_player_turn = True
 
 def check_win( board, coords ):
     for row in board:
@@ -59,10 +60,7 @@ def update_window():
 def game_logic(pos, current_player):
     if test_.test_board[pos[1]][pos[0]] == 0:
         test_.test_board[pos[1]][pos[0]] = current_player
-        if test_.test_current_player == 1:
-            test_.test_current_player = 2
-        else:
-            test_.test_current_player = 1
+        test_.test_player_turn = False
 
 def main():
     winning_player = 0
@@ -80,9 +78,12 @@ def main_online():
     game_is_on = True
     while game_is_on:
         events()
-        client_network.client_send(test_.test_board)
-        test_.test_board = client_network.client_recive()
-
+        if not test_.test_player_turn:
+            client_network.client_send(test_.test_board)
+            test_.test_board = client_network.client_recive()
+            test_.test_player_turn = True
+            print(f"board {test_.test_board}, player turn {test_.test_player_turn}")
+        
         winning_player, game_is_on = check_win(test_.test_board, (0,0))
         update_window()
         

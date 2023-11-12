@@ -1,6 +1,8 @@
 import socket
 import threading
 import ast
+import TicTacToeAI
+import online_logic
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(("localhost", 8888))  # Use any available network interface and port 8888
 server.listen(5)  # Listen for up to 5 connections
@@ -20,9 +22,13 @@ def string_to_2d_array(input_str):
     except (SyntaxError, ValueError) as e:
         print(f"Error: {e}")
         return None
+
+def table_to_str(table):
+    return "[" + ",".join("[{}]".format(",".join(map(str, row))) for row in table) + "]"
+
 def handle_user_message(data) -> str:
     
-    return data
+    return table_to_str(TicTacToeAI.AI(string_to_2d_array(data)))
 
 
 # Function to handle a client connection
