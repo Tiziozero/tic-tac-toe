@@ -1,6 +1,7 @@
 import pygame
 from test_dir import test_
 #import TicTacToeAI
+from online_code import client_network
 
 def check_win( board, coords ):
     for row in board:
@@ -73,11 +74,15 @@ def main():
     print(f"{winning_player} won") 
     pygame.quit()
 
-def main_ai():
+def main_online():
+    client_network.setup()
     winning_player = 0
     game_is_on = True
     while game_is_on:
         events()
+        client_network.client_send(test_.test_board)
+        test_.test_board = client_network.client_recive()
+
         winning_player, game_is_on = check_win(test_.test_board, (0,0))
         update_window()
         

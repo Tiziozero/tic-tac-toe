@@ -3,7 +3,6 @@ from test_dir import test_
 from ai_code import TicTacToeAI
 
 
-test_.test_current_player = 1
 def check_win( board, coords ):
     for row in board:
         if row[0] == row[1] == row[2]:
