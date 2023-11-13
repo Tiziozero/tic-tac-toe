@@ -63,16 +63,6 @@ def game_logic(pos, current_player):
         test_.test_player_turn = False
 
 def main():
-    winning_player = 0
-    game_is_on = True
-    while game_is_on:
-        events()
-        winning_player, game_is_on = check_win(test_.test_board, (0,0))
-        update_window()
-    print(f"{winning_player} won") 
-    pygame.quit()
-
-def main_online():
     client_network.setup()
     winning_player = 0
     game_is_on = True

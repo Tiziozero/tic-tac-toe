@@ -1,9 +1,9 @@
-import pygame
+#import pygame
 from test_dir import test_
-from pvp_code import pvp_logic
-from ai_code import ai_logic 
+from local_pvp import pvp_logic
+from local_ai import ai_logic 
 from online_code import online_ai_logic
-
+"""
 pygame.init()
 
 font = pygame.font.Font(None, 36)  # None uses the default font, 36 is the size
@@ -46,3 +46,22 @@ while True:
     test_.window.blit(text_c, text_rect_c)
     test_.window.blit(text_d, text_rect_d)
     pygame.display.flip()
+"""
+print("Modes:")
+print("    [0] local pvp")
+print("    [1] local ai")
+print("    [2] online pvp")
+print("    [3] online ai")
+try:
+    mode = int(input("Enter mode: "))
+except:
+    print("Invalid input")
+    quit()
+if mode == 0:
+    pvp_logic.main()
+elif mode == 1:
+    ai_logic.main()
+elif mode == 2:
+    print("mode not developed yet")
+elif mode == 3:
+    online_ai_logic.main()

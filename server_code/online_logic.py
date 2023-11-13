@@ -3,7 +3,7 @@
 import socket
 import threading
 import ast
-import TicTacToeAI
+import TicTacToeAI 
 server_ip = 'localhost'
 #server_ip = '139.162.200.195' #when on server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,7 +32,6 @@ def check_win( board, coords ):
         for element in row:
             if element == 0:
                 return 0,  True
-
     return 3, False
 
 def string_to_2d_array(input_str):

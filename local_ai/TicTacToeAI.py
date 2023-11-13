@@ -1,4 +1,4 @@
-from ai_code import ai_logic
+from local_ai import ai_logic
 #u suck dick bozo
 def miniMax(board, depth, p1) :  
     score = ai_logic.check_win(board, None)
