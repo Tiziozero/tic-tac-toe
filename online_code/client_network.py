@@ -22,11 +22,10 @@ def setup():
     print("Set up")
 
 def client_recive():#-> List[List[int]]:
-    board = pickle.loads(client_socket.recv(512))
-    return board
+    return pickle.loads(client_socket.recv(512))
 
 def client_send(board):
-    client_socket.send(board)
+    client_socket.send(pickle.dumps(board))
     
 def _test_func():
     try:

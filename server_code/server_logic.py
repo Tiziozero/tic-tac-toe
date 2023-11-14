@@ -32,101 +32,101 @@ def check_win( board, coords ):
                 return 0,  True
     return 3, False
 
-def handle_user_message(data):
-    """
-    send board to all
-    get p1 input 
-    chack win
-    send board to all
-    get p2 input
-    check win
-    """
-    data = TicTacToeAI.AI(data)
-    return data
-        
 
-
-# Function to handle a client connection
-def handle_client(client_socket1, addr1, client_socket2 = None, addr2 = None):
+def handle_client(client_socket1, addr1, client_socket2, addr2):
 
     print(f"Accepted connection from {addr1}, {addr1} is player 1")
-    print(f"Accepted connection from {addr2}, {addr2} is player 1")
-    # defina local variavbels
+    print(f"Accepted connection from {addr2}, {addr2} is player 2")
+    
+    # Initialize local variables
     game_on = True
-    local_board = [[0,0,0],[0,0,0],[0,0,0]]
-
-    # define local functions
+    local_board = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    players = [1, 2]
+    winning_player = 0
+    local_index = 0
+    clients = [client_socket1, client_socket2]
+    
     def send_all(data):
         client_socket1.send(pickle.dumps(data))
-        if client_socket2:
-            client_socket2.send(pickle.dumps(data))
-
-    while game_on:
+        client_socket2.send(pickle.dumps(data))
+    
+    def receive_move():
+        print(local_index)
         try:
-            send_all(local_board) # will need do decode 
-            while True:
+            return pickle.loads(clients[local_index].recv(512))
+        except pickle.UnpicklingError as e:
+            print(f"UnpicklingError: {e}")
+        except Exception as e:
+            print(f"Error: {e}")
+
+
+
+    send_all(local_board)
+    while game_on:
+
+        try:
+            move = receive_move()
+            if move:
                 try:
-                    local_board = pickle.loads(client_socket1.recv(512))
-                    recived_data = local_board 
-                    print(f"            data: {recived_data}")
-                    break
+                    print(move[0], ", ", move[1])
+                    local_board[move[0]][move[1]] = players[local_index]
+                    winning_player, game_on = check_win(local_board, players[local_index])
+                    print(local_board[0])
+                    print(local_board[1])
+                    print(local_board[2])
                 except:
-                    pass
-                
-            if local_board:
-                game_on = not check_win(local_board, 0)
-            else:
-                print(f"recived {recived_data}")
-                break
-
-            handle_user_message(local_board)
-                
-            send_all(local_board)
-            sent_data = local_board
-            print(f"recived {str(recived_data):_<50}, sending {str(sent_data):_<50}")
-            while True:
-                try:                                        #chould be 2
-                    local_board = pickle.loads(client_socket1.recv(512))
-                    recived_data = local_board 
-                    break
-                except:
-                    pass
-                
-            if local_board:
-                game_on = check_win(local_board, 0)
-            else:
-                print(f"recived {recived_data}")
-                break
-
-            handle_user_message(local_board)
-
+                    print("Error")
+            
         except socket.error as e:
             print(str(e))
             break
-   
-    print(f"closed connection with {addr1}, {addr2}")
+
+        local_index = 1 - local_index  # Switch players
+        send_all(local_board)
+
+    if winning_player == 1:
+        print("Player 1 won")
+    elif winning_player == 2:
+        print("Player 2 won")
+    elif winning_player == 3:
+        print("Draw")
+     
+    print(f"Closed connection with {addr1}, {addr2}")
     client_socket1.close()
-    if client_socket2:
-        client_socket2.close()
+    client_socket2.close()
     
 client_sockets = []
 client_addrs = []
 # Function to start the server
 def start_server():
     list_index = 0
+
+
     print("Server listening on port 8888")
+
     try:
-        # scrap this
-        # check if two or more connection
         while True:
+            # Accept the first client connection
             client_socket, addr = server.accept()
+            print(client_socket.recv(1024).decode())
             client_sockets.append(client_socket)
             client_addrs.append(addr)
-            
             list_index += 1
-            
-            client_handler = threading.Thread(target=handle_client, args=(client_socket, addr, client_socket, addr))
+
+            # Accept the second client connection
+            client_socket, addr = server.accept()
+            print(client_socket.recv(1024).decode())
+            client_sockets.append(client_socket)
+            client_addrs.append(addr)
+
+            # Start a thread to handle the two connected clients
+            client_handler = threading.Thread(target=handle_client, args=(client_sockets[0], client_addrs[0], client_sockets[1], client_addrs[1]))
             client_handler.start()
+
+            # Clear the lists for the next pair of clients
+            client_sockets.clear()
+            client_addrs.clear()
+
 
     except KeyboardInterrupt:
         print("Closed server")
