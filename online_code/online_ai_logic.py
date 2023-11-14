@@ -1,4 +1,3 @@
-import pygame
 from test_dir import test_
 #import TicTacToeAI
 from online_code import client_network

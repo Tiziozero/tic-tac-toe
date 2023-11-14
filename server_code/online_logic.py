@@ -1,9 +1,7 @@
-#from test_dir import test_
-#import TicTacToeAI
 import socket
 import threading
-import ast
-import TicTacToeAI 
+import pickle
+import TicTacToeAI
 server_ip = 'localhost'
 #server_ip = '139.162.200.195' #when on server
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,42 +32,7 @@ def check_win( board, coords ):
                 return 0,  True
     return 3, False
 
-def string_to_2d_array(input_str):
-    try:
-        array_2d = ast.literal_eval(input_str)
-        
-        if isinstance(array_2d, list) and all(isinstance(row, list) for row in array_2d):
-            return array_2d
-
-        else:
-            raise ValueError("Invalid input: Not a list of lists")
-    except (SyntaxError, ValueError) as e:
-        print(f"Error: {e}")
-        return None
-
-def table_to_str(table):
-    return "[" + ",".join("[{}]".format(",".join(map(str, row))) for row in table) + "]"
-
-def handle_user_message(data) -> str:
-    """board = string_to_2d_array(data)
-    counter = 0
-    check_win(board, None)
-    for r in range(0, 3):
-        for c in range(0, 3):
-            if board[r][c] == 0:
-                counter += 1
-    if counter == 1:
-        for r in range(0, 3):
-            for c in range(0, 3):
-                if board[r][c] == 0:
-                    board[r][c] = 2
-                    return table_to_str(board)
-    else:
-        try:
-            return table_to_str(TicTacToeAI.AI(board))
-        except:
-            print("Error returning board !!! -> table_to_str(TicTacToeAI.AI(board))")
-    """
+def handle_user_message(data):
     """
     send board to all
     get p1 input 
@@ -78,82 +41,64 @@ def handle_user_message(data) -> str:
     get p2 input
     check win
     """
+    data = TicTacToeAI.AI(data)
     return data
         
 
 
 # Function to handle a client connection
-def handle_client(client_socket1, addr1, client_socket2, addr2):
+def handle_client(client_socket1, addr1, client_socket2 = None, addr2 = None):
 
     print(f"Accepted connection from {addr1}, {addr1} is player 1")
     print(f"Accepted connection from {addr2}, {addr2} is player 1")
     # defina local variavbels
     game_on = True
     local_board = [[0,0,0],[0,0,0],[0,0,0]]
-    
+
     # define local functions
     def send_all(data):
-        client_socket1.send(data)
-        client_socket2.send(data)
+        client_socket1.send(pickle.dumps(data))
+        if client_socket2:
+            client_socket2.send(pickle.dumps(data))
 
-    # game loop
     while game_on:
         try:
-            
-            # send board to all players
-            send_all(table_to_str(local_board).encode()) # will need do decode 
-
-            # recive new board from player
-            local_board = string_to_2d_array(client_socket1.recv(512).decode())
-            recive_data = table_to_str(local_board) 
-            # if recived data
+            send_all(local_board) # will need do decode 
+            while True:
+                try:
+                    local_board = pickle.loads(client_socket1.recv(512))
+                    recived_data = local_board 
+                    print(f"            data: {recived_data}")
+                    break
+                except:
+                    pass
+                
             if local_board:
-                # check if data closes connection
-                #if recive_data == 'kys':
-                #    break
-                # check win
+                game_on = not check_win(local_board, 0)
+            else:
+                print(f"recived {recived_data}")
+                break
+
+            handle_user_message(local_board)
+                
+            send_all(local_board)
+            sent_data = local_board
+            print(f"recived {str(recived_data):_<50}, sending {str(sent_data):_<50}")
+            while True:
+                try:                                        #chould be 2
+                    local_board = pickle.loads(client_socket1.recv(512))
+                    recived_data = local_board 
+                    break
+                except:
+                    pass
+                
+            if local_board:
                 game_on = check_win(local_board, 0)
             else:
+                print(f"recived {recived_data}")
                 break
-                
-            # handel game data
+
             handle_user_message(local_board)
-            
-                
-            # loop for player 2
-
-            # send board to all players
-            send_all(table_to_str(local_board).encode()) # will need do decode 
-            send_data = table_to_str(local_board)
-            print(f"recived {recive_data:_<50}, sending {send_data:_<50}")
-
-            
-            # send board to all players
-            send_all(table_to_str(local_board).encode()) # will need do decode 
-
-            # recive new board from player
-            local_board = string_to_2d_array(client_socket1.recv(512).decode())
-            recive_data = table_to_str(local_board) 
-            # if recived data
-            if local_board:
-                # check if data closes connection
-                #if recive_data == 'kys':
-                #    break
-                # check win
-                game_on = check_win(local_board, 0)
-            else:
-                break
-                
-            # handel game data
-            handle_user_message(local_board)
-            
-                
-            # loop for player 2
-
-            # send board to all players
-            send_all(table_to_str(local_board).encode()) # will need do decode 
-            send_data = table_to_str(local_board)
-            print(f"recived {recive_data:_<50}, sending {send_data:_<50}")
 
         except socket.error as e:
             print(str(e))
@@ -161,7 +106,8 @@ def handle_client(client_socket1, addr1, client_socket2, addr2):
    
     print(f"closed connection with {addr1}, {addr2}")
     client_socket1.close()
-    client_socket2.close()
+    if client_socket2:
+        client_socket2.close()
     
 client_sockets = []
 client_addrs = []
@@ -176,32 +122,12 @@ def start_server():
             client_socket, addr = server.accept()
             client_sockets.append(client_socket)
             client_addrs.append(addr)
+            
             list_index += 1
-
-        while True:
-            # Accept a connection from a client
-            # accept player 1
-            client_socket1, addr1 = server.accept()
-            print(f"accepted connection to {addr1}, recived:{client_socket1.recv(512):_<50}")
             
-            # accept player 2
-            client_socket2, addr2 = server.accept()
-            print(f"accepted connection to {addr2}, recived:{client_socket2.recv(512):_<50}")
-            
-            # append to lists
-            client_sockets.append(client_socket1)
-            client_addrs.append(addr1)
-            client_sockets.append(client_socket2)
-            client_addrs.append(addr2)
-
-            # Receive data from the client
-            data1 = client_socket1.recv(1024).decode()
-            data2 = client_socket2.recv(1024).decode()
-
-            # Start a new thread to handle the client
-            client_handler = threading.Thread(target=handle_client, args=(client_socket1, addr1, client_socket2, addr2))
+            client_handler = threading.Thread(target=handle_client, args=(client_socket, addr, client_socket, addr))
             client_handler.start()
-            list_index += 1
+
     except KeyboardInterrupt:
         print("Closed server")
         server.close()

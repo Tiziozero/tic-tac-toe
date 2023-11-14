@@ -1,6 +1,6 @@
 import online_logic
 import threading
-
+import pickle
 # Function to start the server
 def start_server():
     print("Server listening on port 8888")
@@ -10,7 +10,7 @@ def start_server():
             client_socket, addr = online_logic.server.accept()
 
             # Receive data from the client
-            data = client_socket.recv(1024).decode()
+            data = pickle.loads(client_socket.recv(1024))
 
             # Start a new thread to handle the client
             client_handler = threading.Thread(target=online_logic.handle_client, args=(client_socket, addr, data))
@@ -21,6 +21,6 @@ def start_server():
         quit()
 
 # Start the server
-start_server()
+online_logic.start_server()
 
 
