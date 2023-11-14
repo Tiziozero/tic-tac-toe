@@ -1,4 +1,4 @@
-import online_logic
+import server_logic
 
 #u suck dick bozo
 def miniMax(board, depth, p1) :  
