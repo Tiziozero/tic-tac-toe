@@ -152,13 +152,8 @@ def start_server():
     try:
         while True:
             # Accept a connection from a client
-            # accept player 1
             client_socket1, addr1 = server.accept()
-            
-            # accept player 2
             client_socket2, addr2 = server.accept()
-            
-            # append to lists
             client_sockets.append(client_socket1)
             client_addrs.append(addr1)
             client_sockets.append(client_socket2)
@@ -170,9 +165,7 @@ def start_server():
 
             # Start a new thread to handle the client
             client_handler = threading.Thread(target=handle_client, args=(client_socket1, addr1, client_socket2, addr2, data1, data2))
-            
             client_handler.start()
-            
             list_index += 1
     except KeyboardInterrupt:
         print("Closed server")

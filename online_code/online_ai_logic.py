@@ -2,7 +2,6 @@ import pygame
 from test_dir import test_
 #import TicTacToeAI
 from online_code import client_network
-test_.test_player_turn = True
 
 def check_win( board, coords ):
     for row in board:
@@ -23,51 +22,40 @@ def check_win( board, coords ):
                 return board[0][col], False
     return 0, True
 
-def blit_board():
-    for y in range(3):
-        for x in range(3):
-            if test_.test_board[y][x] == 0:
-                    pygame.draw.rect(test_.window,(255, 0, 0), pygame.Rect((x * 50 + 275, y * 50  ), (50, 50)))
-
-            if test_.test_board[y][x] == 1:
-                    pygame.draw.rect(test_.window,(0, 255, 0), pygame.Rect((x * 50 + 275, y * 50  ), (50, 50)))
-
-            if test_.test_board[y][x] == 2:
-                    pygame.draw.rect(test_.window,(0, 0, 255), pygame.Rect((x * 50 + 275, y * 50  ), (50, 50)))
-
-def hover_over():
-    mouse_pos = pygame.mouse.get_pos()
-    for y in range(3):
-        for x in range(3):
-            #if test_.test_board[y][x] == 0:
-                if mouse_pos[0] >= x * 50 + 275 and mouse_pos[0] <= x * 50 + 275 + 50:
-                    if mouse_pos[1] >= y * 50  and mouse_pos[1] <= y * 50 + 50:
-                                print(f"collision with {x}, {y}")
-                                return (x, y)
-
-def events():
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            game_logic(hover_over(), test_.test_current_player)
-
-def update_window():
-    test_.window.blit(test_.b_image, test_.b_rect)
-    blit_board()
-    pygame.display.flip()
+def get_coords():
+    while True:
+        coords = input("row, col (eg '0,1'): ")
+        try:
+            x, y = int(coords[0]), int(coords[2])
+            #print(f"x: {x}, y: {y}")
+            return x, y
+        except:
+            print("invalid input")
 
 def game_logic(pos, current_player):
     if test_.test_board[pos[1]][pos[0]] == 0:
         test_.test_board[pos[1]][pos[0]] = current_player
-        test_.test_player_turn = False
+        if test_.test_current_player == 1:
+            test_.test_current_player = 2
+        else:
+            test_.test_current_player = 1
+    else:
+        print("not valid cell")
+def print_board(board):
+    for row in board:
+        print(row)
 
 def main():
-    client_network.setup()
     winning_player = 0
     game_is_on = True
     while game_is_on:
-        events()
+        print_board()d
+        x, y = get_coords()
+        game_logic((x,y), test_.test_current_player)
+        winning_player, game_is_on = check_win(test_.test_board, (0,0))
+    print(f"{winning_player} won") 
+
+    while game_is_on:
         if not test_.test_player_turn:
             client_network.client_send(test_.test_board)
             test_.test_board = client_network.client_recive()
@@ -75,8 +63,3 @@ def main():
             print(f"board {test_.test_board}, player turn {test_.test_player_turn}")
         
         winning_player, game_is_on = check_win(test_.test_board, (0,0))
-        update_window()
-        
-    print(f"{winning_player} won") 
-    pygame.quit()
-

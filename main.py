@@ -63,5 +63,6 @@ elif mode == 1:
     ai_logic.main()
 elif mode == 2:
     print("mode not developed yet")
+    online_ai_logic.main()
 elif mode == 3:
     online_ai_logic.main()
