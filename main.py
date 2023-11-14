@@ -47,6 +47,7 @@ while True:
     test_.window.blit(text_d, text_rect_d)
     pygame.display.flip()
 """
+"""
 print("Modes:")
 print("    [0] local pvp")
 print("    [1] local ai")
@@ -57,6 +58,9 @@ try:
 except:
     print("Invalid input")
     quit()
+    """
+# for test purposes
+mode = 2
 if mode == 0:
     pvp_logic.main()
 elif mode == 1:

@@ -48,8 +48,9 @@ def print_board(board):
 def main():
     winning_player = 0
     game_is_on = True
+    game_board = client_network.client_recive()
     while game_is_on:
-        print_board()d
+        print_board(game_board)
         x, y = get_coords()
         game_logic((x,y), test_.test_current_player)
         winning_player, game_is_on = check_win(test_.test_board, (0,0))

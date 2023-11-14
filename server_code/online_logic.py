@@ -83,58 +83,78 @@ def handle_user_message(data) -> str:
 
 
 # Function to handle a client connection
-def handle_client(client_socket1, addr1, client_socket2, addr2, data1, data2):
+def handle_client(client_socket1, addr1, client_socket2, addr2):
 
     print(f"Accepted connection from {addr1}, {addr1} is player 1")
     print(f"Accepted connection from {addr2}, {addr2} is player 1")
+    # defina local variavbels
+    game_on = True
     local_board = [[0,0,0],[0,0,0],[0,0,0]]
-    p1 = client_socket1
-    p2 = client_socket2
     
     # define local functions
     def send_all(data):
-        p1.send(data)
-        p2.send(data)
+        client_socket1.send(data)
+        client_socket2.send(data)
 
     # game loop
-    while True:
+    while game_on:
         try:
             
             # send board to all players
             send_all(table_to_str(local_board).encode()) # will need do decode 
 
             # recive new board from player
-            recive_data = p1.recv(512).decode()
-            
+            local_board = string_to_2d_array(client_socket1.recv(512).decode())
+            recive_data = table_to_str(local_board) 
             # if recived data
-            if recive_data:
+            if local_board:
                 # check if data closes connection
-                if recive_data == 'kys':
-                    break
+                #if recive_data == 'kys':
+                #    break
+                # check win
+                game_on = check_win(local_board, 0)
+            else:
+                break
                 
-                # handel game data
-                send_data = handle_user_message(recive_data)
-                
-                print(f"recived {recive_data:_<50}, sending {send_data:_<50}")
+            # handel game data
+            handle_user_message(local_board)
+            
                 
             # loop for player 2
 
             # send board to all players
             send_all(table_to_str(local_board).encode()) # will need do decode 
+            send_data = table_to_str(local_board)
+            print(f"recived {recive_data:_<50}, sending {send_data:_<50}")
+
+            
+            # send board to all players
+            send_all(table_to_str(local_board).encode()) # will need do decode 
 
             # recive new board from player
-            recive_data2 = p2.recv(512).decode()
-            
+            local_board = string_to_2d_array(client_socket1.recv(512).decode())
+            recive_data = table_to_str(local_board) 
             # if recived data
-            if recive_data2:
+            if local_board:
                 # check if data closes connection
-                if recive_data2 == 'kys':
-                    break
+                #if recive_data == 'kys':
+                #    break
+                # check win
+                game_on = check_win(local_board, 0)
+            else:
+                break
                 
-                # handel game data
-                send_data2 = handle_user_message(recive_data2)
+            # handel game data
+            handle_user_message(local_board)
+            
                 
-                print(f"recived {recive_data2:_<50}, sending {send_data2:_<50}")
+            # loop for player 2
+
+            # send board to all players
+            send_all(table_to_str(local_board).encode()) # will need do decode 
+            send_data = table_to_str(local_board)
+            print(f"recived {recive_data:_<50}, sending {send_data:_<50}")
+
         except socket.error as e:
             print(str(e))
             break
@@ -150,13 +170,23 @@ def start_server():
     list_index = 0
     print("Server listening on port 8888")
     try:
+        # scrap this
+        # check if two or more connection
+        while True:
+            client_socket, addr = server.accept()
+            client_sockets.append(client_socket)
+            client_addrs.append(addr)
+            list_index += 1
+
         while True:
             # Accept a connection from a client
             # accept player 1
             client_socket1, addr1 = server.accept()
+            print(f"accepted connection to {addr1}, recived:{client_socket1.recv(512):_<50}")
             
             # accept player 2
             client_socket2, addr2 = server.accept()
+            print(f"accepted connection to {addr2}, recived:{client_socket2.recv(512):_<50}")
             
             # append to lists
             client_sockets.append(client_socket1)
@@ -169,10 +199,8 @@ def start_server():
             data2 = client_socket2.recv(1024).decode()
 
             # Start a new thread to handle the client
-            client_handler = threading.Thread(target=handle_client, args=(client_socket1, addr1, client_socket2, addr2, data1, data2))
-            
+            client_handler = threading.Thread(target=handle_client, args=(client_socket1, addr1, client_socket2, addr2))
             client_handler.start()
-            
             list_index += 1
     except KeyboardInterrupt:
         print("Closed server")

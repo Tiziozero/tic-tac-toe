@@ -6,7 +6,7 @@ import ast
 #client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_connection = ("localhost", 8888)
-server_connection = ("139.162.200.195", 8888)
+#server_connection = ("139.162.200.195", 8888)
 
 # funcs
 
@@ -17,6 +17,7 @@ def setup():
         client_socket.send("uwu u".encode())
     except socket.error as e:
         print(str(e))
+        print("failed to set up")
         quit()
     print("Set up")
 
