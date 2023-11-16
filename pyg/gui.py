@@ -8,8 +8,9 @@ class Game_Type(Enum):
 
 
 class Game:
-    def __init__(self, width, height):
+    def __init__(self, width, height, multiplier):
         # pygame stuff
+        self.multiplier = multiplier or 1
         self.WIDTH, self.HEIGHT = width, height
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("i cant take this anymore")
@@ -19,7 +20,7 @@ class Game:
         self.current_player = 1
         
         # game images
-        self.total = 300
+        self.total = 300 * self.multiplier
         self.board = None
         self.board_empty = None
         self.board_grid = None
@@ -36,7 +37,6 @@ class Game:
         self.board_grid = pygame.image.load("graphics/board_grid.png")
         self.cross = pygame.image.load("graphics/cross.png")
         self.dot = pygame.image.load("graphics/dot.png")
-
         # resize
         original_size = self.board.get_size()
         scale_factor = 1.3072
