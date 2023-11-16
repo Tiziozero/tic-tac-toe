@@ -1,9 +1,5 @@
 import pygame
 from enum import Enum
-if __name__ != '__main__':
-    from local_ai import ai_logic
-    from local_pvp import pvp_logic
-
 
 class Game_Type(Enum):
     GAME_TYPE_AI = 1
