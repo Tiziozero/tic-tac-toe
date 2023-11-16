@@ -2,11 +2,8 @@ import socket
 import threading
 import pickle
 import TicTacToeAI
-server_ip = 'localhost'
-#server_ip = '139.162.200.195' #when on server
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((server_ip, 8888))
-server.listen(5)
+import _server_class
+import _server_settings
 
 def check_win( board, coords ):
     for row in board:
@@ -97,7 +94,8 @@ def handle_client(client_socket1, addr1, client_socket2, addr2):
     
 client_sockets = []
 client_addrs = []
-# Function to start the server
+games = []
+# Function to start the _server_settings.server
 def start_server():
     list_index = 0
 
@@ -106,29 +104,34 @@ def start_server():
 
     try:
         while True:
+            print("Round")
             # Accept the first client connection
-            client_socket, addr = server.accept()
-            print(client_socket.recv(1024).decode())
-            client_sockets.append(client_socket)
-            client_addrs.append(addr)
+            client_socket1, addr1 = _server_settings.server.accept()
+            print(client_socket1.recv(1024).decode())
+            client_sockets.append(client_socket1)
+            client_addrs.append(addr1)
             list_index += 1
-
+            
             # Accept the second client connection
-            client_socket, addr = server.accept()
-            print(client_socket.recv(1024).decode())
-            client_sockets.append(client_socket)
-            client_addrs.append(addr)
-
+            client_socket2, addr2 = _server_settings.server.accept()
+            print(client_socket2.recv(1024).decode())
+            client_sockets.append(client_socket2)
+            client_addrs.append(addr2)
+            game = _server_class.Server(client_socket1, client_socket2)
+            games.append(game)
             # Start a thread to handle the two connected clients
-            client_handler = threading.Thread(target=handle_client, args=(client_sockets[0], client_addrs[0], client_sockets[1], client_addrs[1]))
+            #client_handler = threading.Thread(target=handle_client, args=(client_sockets[0], client_addrs[0], client_sockets[1], client_addrs[1]))
+            client_handler = threading.Thread(target=game.main(), args=())
             client_handler.start()
 
             # Clear the lists for the next pair of clients
             client_sockets.clear()
             client_addrs.clear()
+            print("end")
+
 
 
     except KeyboardInterrupt:
-        print("Closed server")
-        server.close()
+        print("Closed _server_settings.server")
+        _server_settings.server.close()
         quit()

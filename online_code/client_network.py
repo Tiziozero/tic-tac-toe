@@ -22,7 +22,19 @@ def setup():
     print("Set up")
 
 def client_recive():#-> List[List[int]]:
-    return pickle.loads(client_socket.recv(512))
+    try:
+        data = pickle.loads(client_socket.recv(1024))
+        return data
+    except pickle.UnpicklingError as e:
+        print(f"UnpicklingError: {e}")
+        return
+    except socket.error as e:
+        print(f"Socket Error: {e}")
+        return
+        # Handle the error appropriately
+    except Exception as e:
+        print(f"Unexpected Error: {e}")
+        return
 
 def client_send(board):
     client_socket.send(pickle.dumps(board))
@@ -37,7 +49,9 @@ def _test_func():
                 print("no data")
             message = client_socket.recv(512)
             
-            print(f"Received from server: {message}")
+            if message:
+
+                print(f"Received from server: {message}")
 
     except KeyboardInterrupt:
         print("Client terminated by user.")
