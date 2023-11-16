@@ -46,19 +46,24 @@ class Game:
         #self.board = pygame.transform.scale(self.board, (800, 800))
 
 
-    def update_screen(self):
+    def update_screen(self, x_off = 0, y_off = 0, winning_player = None):
         for x in range(3):
             for y in range(3):
                 if self.local_board[y][x] == 0:
                     pass
                 elif self.local_board[y][x] == 1:
                     rect = self.cross.get_rect()
-                    rect.x, rect.y = self.x_start + 100 * x, self.y_start + 100 * y
+                    rect.x, rect.y = self.x_start + x_off + 100 * x, self.y_start + y_off + 100 * y
                     self.screen.blit(self.cross, rect)
                 elif self.local_board[y][x] == 2:
                     rect = self.dot.get_rect()
-                    rect.x, rect.y = self.x_start + 100 * x, self.y_start + 100 * y
+                    rect.x, rect.y = self.x_start + x_off + 100 * x, self.y_start + y_off + 100 * y
                     self.screen.blit(self.dot, rect)
+        if not winning_player:
+            if self.current_player == 1:
+                self.screen.blit(self.cross,(10,10))
+            elif self.current_player == 2:
+                self.screen.blit(self.dot, (10,10))
 
     def get_cell(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
@@ -128,6 +133,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
+                    quit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_a:
                         print("AI mode selected")
@@ -242,16 +248,20 @@ class Game:
     def winning_player_screen(self, winning_player):
         text = self.font.render(f"player {winning_player} won... bearly", True, (255,0,0))
         bg_rect = self.board.get_rect()
+        
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
+                    quit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         print("quitting winning screen")
                         return
             self.screen.blit(self.board_empty, bg_rect)
-            self.screen.blit(text, (self.WIDTH // 2 - text.get_width() // 2, self.HEIGHT // 2 ))
+            self.screen.blit(text, (self.WIDTH // 2 - text.get_width() // 2, self.HEIGHT - 50  ))
+            self.screen.blit(self.board_grid, (0, -50))
+            self.update_screen(0, -50, winning_player)
             pygame.display.flip()
             
 
