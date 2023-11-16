@@ -5,7 +5,7 @@
 please help
 im about to just delete this whole crap
 
-
+needs pygame
 
 
 
