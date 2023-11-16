@@ -216,6 +216,7 @@ class Game:
             self.update_screen()
             pygame.display.flip()
         print(f"player {winning_player} won!")
+        self.winning_player_screen(winning_player)
         return winning_player
 
     def game_ai(self):
@@ -239,8 +240,24 @@ class Game:
             self.update_screen()
             pygame.display.flip()
         print(f"player {winning_player} won!")
+        self.winning_player_screen(winning_player)
         return winning_player
-
+    
+    def winning_player_screen(self, winning_player):
+        text = self.font.render(f"player {winning_player} won... bearly", True, (255,0,0))
+        bg_rect = self.board.get_rect()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        print("quitting winning screen")
+                        return
+            self.screen.blit(self.board_empty, bg_rect)
+            self.screen.blit(text, (self.WIDTH // 2 - text.get_width() // 2, self.HEIGHT // 2 ))
+            pygame.display.flip()
+            
 
     def main(self):
         app_on = True
