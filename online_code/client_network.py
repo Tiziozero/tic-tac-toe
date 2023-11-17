@@ -1,65 +1,38 @@
 import socket
-from typing import List
 import pickle
 
+class Network:
+    def __init__(self):
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.ip, self.port = 'localhost', 8888
+        self.connection = None
 
-#client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_connection = ("localhost", 8888)
-#server_connection = ("139.162.200.195", 8888)
+    def connect(self):
+        try:
+            self.client.connect((self.ip, self.port))
+            print(f"Successfully connected to {self.ip}:{self.port}")
+            self.connection = self.client
+        except socket.error as e:
+            print(f"ERROR: {str(e)}")
 
-# funcs
-
-
-def setup():
-    try:
-        client_socket.connect(server_connection)  # use any available network interface and port 8888
-        client_socket.send("uwu u".encode())
-    except socket.error as e:
-        print(str(e))
-        print("failed to set up")
-        quit()
-    print("Set up")
-
-def client_recive():#-> List[List[int]]:
-    try:
-        data = pickle.loads(client_socket.recv(1024))
-        return data
-    except pickle.UnpicklingError as e:
-        print(f"UnpicklingError: {e}")
-        return
-    except socket.error as e:
-        print(f"Socket Error: {e}")
-        return
-        # Handle the error appropriately
-    except Exception as e:
-        print(f"Unexpected Error: {e}")
-        return
-
-def client_send(board):
-    client_socket.send(pickle.dumps(board))
-    
-def _test_func():
-    try:
-        message = [[0,0,0],[0,0,0],[0,0,0]]
+    def receive(self):
         while True:
             try:
-                client_socket.send(pickle.dumps(message))
-            except:
-                print("no data")
-            message = client_socket.recv(512)
-            
-            if message:
+                data = self.connection.recv(1024)
 
-                print(f"Received from server: {message}")
+                decoded_data = pickle.loads(data)
+                print(f"Received: {decoded_data:_<30}")
 
-    except KeyboardInterrupt:
-        print("Client terminated by user.")
-        client_socket.send('kys'.encode())
-
-    finally:
-        client_socket.close()
+            except pickle.UnpicklingError as e:
+                print(f"ERROR -> UnpicklingError: {str(e)}")
+            except EOFError:
+                print("Connection closed by the server.")
+                #break
+            except Exception as e:
+                print(f"ERROR: {str(e)}")
 
 if __name__ == '__main__':
-    setup()
-    _test_func()
+    n = Network()
+    n.connect()
+    n.receive()
+
