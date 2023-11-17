@@ -2,10 +2,29 @@ import pygame
 from enum import Enum
 from random import choice
 class Game_Type(Enum):
-    GAME_TYPE_AI = 1
-    GAME_TYPE_PVP = 2
+    GAME_TYPE_AI = 1,
+    GAME_TYPE_PVP = 2,
     GAME_TYPE_QUIT = 3
 
+class Button:
+    def __init__(self, x, y, width, hight, size, font, text, mode):
+        self.x = x
+        self.y = y
+        self.img = font.render(text, True, (255,0,0))
+        self.mode = mode
+        print("button mode", mode)
+    def hover_over(self, mouse_pos):
+        if mouse_pos[0] >= self.x - self.img.get_width() // 2 and mouse_pos[0] <= self.x + self.img.get_width() // 2:
+            if mouse_pos[1] >= self.y - self.img.get_height() // 2 and mouse_pos[1] <= self.y + self.img.get_height() // 2:
+                print("in range")
+                return True
+    def click(self, mouse_pos):
+        if self.hover_over(mouse_pos):
+            return self.mode
+
+
+    def display(self, screen):
+        screen.blit(self.img, (self.x - self.img.get_width() // 2, self.y - self.img.get_height() // 2))
 
 class Game:
     def __init__(self, width, height, multiplier):
@@ -15,7 +34,7 @@ class Game:
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("i cant take this anymore")
 
-        self.font = pygame.font.Font(None, int(36 * self.multiplier))
+        self.font = pygame.font.Font("font/font.otf", int(36 * self.multiplier))
         # game board
         self.local_board = [[0,0,0],[0,0,0],[0,0,0]]
         self.current_player = 1
@@ -167,6 +186,47 @@ class Game:
             self.screen.blit(text_q, (self.WIDTH // 2 - text_p.get_width() // 2, self.HEIGHT // 2 + (108 * self.multiplier)))
 
             pygame.display.flip()
+
+    # button menu
+    def game_menu1(self):                                # Set up fonts
+        menu_buttons = []
+        # (self, x, y, width, hight, size, font, text, mode):
+        button_a = Button(self.WIDTH // 2, self.HEIGHT // 2 - 75 * self.multiplier, 0, 0, 0, self.font, "AI mode", Game_Type.GAME_TYPE_AI)
+        menu_buttons.append(button_a)
+        button_p = Button(self.WIDTH // 2, self.HEIGHT // 2 + 0 * self.multiplier, 0, 0, 0, self.font, "PvP", Game_Type.GAME_TYPE_PVP)
+        menu_buttons.append(button_p)
+        button_q = Button(self.WIDTH // 2, self.HEIGHT // 2 + 75 * self.multiplier, 0, 0, 0, self.font, "Quit", Game_Type.GAME_TYPE_QUIT)
+        menu_buttons.append(button_q)
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_a:
+                        print("AI mode selected")
+                        # Add your AI mode logic here
+                        return Game_Type.GAME_TYPE_AI 
+                    elif event.key == pygame.K_p:
+                        print("PvP mode selected")
+                        return Game_Type.GAME_TYPE_PVP
+                    elif event.key == pygame.K_q:
+                        print("Quitting game")
+                        return Game_Type.GAME_TYPE_QUIT
+                if event.type == pygame.MOUSEBUTTONUP:
+                    mpos = pygame.mouse.get_pos()
+                    for button in menu_buttons:
+                        mode = button.click(mpos)
+                        if mode:
+                            return mode
+
+            self.screen.blit(self.board_empty, (0,0))
+            for button in menu_buttons:
+                button.display(self.screen)
+
+            pygame.display.flip()
+
     # minmax ai
     def miniMax(self,board, depth, p1) :  
         score = self.check_win(board)
@@ -218,6 +278,7 @@ class Game:
 
 
     def game_pvp(self):
+        print("PvP")
         self.local_board = [[0,0,0],[0,0,0],[0,0,0]]
         self.current_player = 1
         bg_rect = self.board.get_rect()
@@ -236,6 +297,7 @@ class Game:
         return winning_player
 
     def game_ai(self):
+        print("AI")
         self.local_board = [[0,0,0],[0,0,0],[0,0,0]]
         self.current_player = 1
         bg_rect = self.board.get_rect()
@@ -260,7 +322,10 @@ class Game:
         return winning_player
     
     def winning_player_screen(self, winning_player):
-        text = self.font.render(f"player {winning_player} won... bearly", True, (255,0,0))
+        if winning_player > 2:
+            text = self.font.render(f"Draw", True, (255,0,0))
+        elif winning_player == 2 or winning_player == 1:
+            text = self.font.render(f"player {winning_player} won", True, (255,0,0))
         bg_rect = self.board.get_rect()
         self.impact.play()
         while True:
@@ -282,9 +347,11 @@ class Game:
     def main(self):
         app_on = True
         pygame.mixer.music.play(-1)
+        self.setup_board()
         while app_on:
-            self.setup_board()
-            mode = self.game_menu()
+            print(f"ai: {Game_Type.GAME_TYPE_AI}, pvp: {Game_Type.GAME_TYPE_PVP}, quit: {Game_Type.GAME_TYPE_QUIT}") 
+            mode = self.game_menu1()
+            print(f"mode: {mode}")
             
             if mode == Game_Type.GAME_TYPE_AI:
                 self.game_ai()
@@ -293,6 +360,9 @@ class Game:
             elif mode == Game_Type.GAME_TYPE_QUIT:
                 app_on = False
                 break
+            else:
+                print(f"invalid mode {mode}")
+                app_on = False
         pygame.quit()
         quit()
        
