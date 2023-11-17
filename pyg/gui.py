@@ -1,6 +1,7 @@
 import pygame
 from enum import Enum
 from random import choice
+import os
 class Game_Type(Enum):
     GAME_TYPE_AI = 1,
     GAME_TYPE_PVP = 2,
@@ -28,6 +29,7 @@ class Button:
 
 class Game:
     def __init__(self, width, height, multiplier):
+        self.current_dir = ""# os.path.dirname(os.path.abspath(__file__)) + "/"
         # pygame stuff
         self.multiplier = multiplier or 1
         self.WIDTH, self.HEIGHT = 800 * self.multiplier, 450 * self.multiplier
@@ -51,10 +53,10 @@ class Game:
         self.y_start = (self.HEIGHT // 2 - self.total // 2)# * self.multiplier
 
         # sounds
-        self.crosses = [ pygame.mixer.Sound("audio/Cross_1.mp3"), pygame.mixer.Sound("audio/Cross_2.mp3") ]
-        self.circles = [ pygame.mixer.Sound("audio/Circle_1.mp3"), pygame.mixer.Sound("audio/Circle_2.mp3") ]
-        self.impact = pygame.mixer.Sound("audio/impact_game_won.mp3")
-        self.bgm = pygame.mixer.music.load("audio/bgm.mp3")
+        self.crosses = [ pygame.mixer.Sound(self.current_dir + "audio/Cross_1.mp3"), pygame.mixer.Sound(self.current_dir + "audio/Cross_2.mp3") ]
+        self.circles = [ pygame.mixer.Sound(self.current_dir + "audio/Circle_1.mp3"), pygame.mixer.Sound(self.current_dir + "audio/Circle_2.mp3") ]
+        self.impact = pygame.mixer.Sound(self.current_dir + "audio/impact_game_won.mp3")
+        self.bgm = pygame.mixer.music.load(self.current_dir + "audio/bgm.mp3")
         pygame.mixer.music.set_volume(0.8)
 
     def setup_board(self):
