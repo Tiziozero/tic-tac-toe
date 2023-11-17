@@ -1,6 +1,6 @@
 import pygame
 from enum import Enum
-
+from random import choice
 class Game_Type(Enum):
     GAME_TYPE_AI = 1
     GAME_TYPE_PVP = 2
@@ -11,39 +11,50 @@ class Game:
     def __init__(self, width, height, multiplier):
         # pygame stuff
         self.multiplier = multiplier or 1
-        self.WIDTH, self.HEIGHT = width, height
+        self.WIDTH, self.HEIGHT = 800 * self.multiplier, 450 * self.multiplier
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("i cant take this anymore")
-        self.font = pygame.font.Font(None, 36)
+
+        self.font = pygame.font.Font(None, int(36 * self.multiplier))
         # game board
         self.local_board = [[0,0,0],[0,0,0],[0,0,0]]
         self.current_player = 1
         
         # game images
         self.total = 300 * self.multiplier
+        self.cell = self.total // 3
         self.board = None
         self.board_empty = None
         self.board_grid = None
         self.cross = None
         self.dot = None
-        self.x_start = self.WIDTH // 2- self.total // 2
-        self.y_start = self.HEIGHT // 2 - self.total // 2
+        self.x_start = (self.WIDTH // 2 - self.total // 2)# * self.multiplier
+        self.y_start = (self.HEIGHT // 2 - self.total // 2)# * self.multiplier
 
+        # sounds
+        self.crosses = [ pygame.mixer.Sound("audio/Cross_1.mp3"), pygame.mixer.Sound("audio/Cross_2.mp3") ]
+        self.circles = [ pygame.mixer.Sound("audio/Circle_1.mp3"), pygame.mixer.Sound("audio/Circle_2.mp3") ]
+        self.impact = pygame.mixer.Sound("audio/impact_game_won.mp3")
+        self.bgm = pygame.mixer.music.load("audio/bgm.mp3")
+        pygame.mixer.music.set_volume(0.8)
 
     def setup_board(self):
         #load images
         self.board = pygame.image.load("graphics/board.png")
+        size = self.board.get_size()
+        self.board = pygame.transform.scale(self.board, (size[0] * self.multiplier, size[1] * self.multiplier)) 
         self.board_empty = pygame.image.load("graphics/board_e.png")
+        size = self.board_empty.get_size()
+        self.board_empty = pygame.transform.scale(self.board_empty, (size[0] * self.multiplier, size[1] * self.multiplier)) 
         self.board_grid = pygame.image.load("graphics/board_grid.png")
+        size = self.board_grid.get_size()
+        self.board_grid = pygame.transform.scale(self.board_grid, (size[0] * self.multiplier, size[1] * self.multiplier)) 
         self.cross = pygame.image.load("graphics/cross.png")
+        size = self.cross.get_size()
+        self.cross = pygame.transform.scale(self.cross, (size[0] * self.multiplier, size[1] * self.multiplier)) 
         self.dot = pygame.image.load("graphics/dot.png")
-        # resize
-        original_size = self.board.get_size()
-        scale_factor = 1.3072
-        new_size = (int(original_size[0] * scale_factor), int(original_size[1] * scale_factor))
-
-        # Scale the image
-        #self.board = pygame.transform.scale(self.board, (800, 800))
+        size = self.dot.get_size()
+        self.dot = pygame.transform.scale(self.dot, (size[0] * self.multiplier, size[1] * self.multiplier)) 
 
 
     def update_screen(self, x_off = 0, y_off = 0, winning_player = None):
@@ -53,17 +64,17 @@ class Game:
                     pass
                 elif self.local_board[y][x] == 1:
                     rect = self.cross.get_rect()
-                    rect.x, rect.y = self.x_start + x_off + 100 * x, self.y_start + y_off + 100 * y
+                    rect.x, rect.y = (self.x_start + x_off + self.cell * x), (self.y_start + y_off + self.cell * y)
                     self.screen.blit(self.cross, rect)
                 elif self.local_board[y][x] == 2:
                     rect = self.dot.get_rect()
-                    rect.x, rect.y = self.x_start + x_off + 100 * x, self.y_start + y_off + 100 * y
+                    rect.x, rect.y = (self.x_start + x_off + self.cell * x), (self.y_start + y_off + self.cell * y)
                     self.screen.blit(self.dot, rect)
         if not winning_player:
             if self.current_player == 1:
-                self.screen.blit(self.cross,(10,10))
+                self.screen.blit(self.cross,(10 * self.multiplier, 10 * self.multiplier))
             elif self.current_player == 2:
-                self.screen.blit(self.dot, (10,10))
+                self.screen.blit(self.dot, (10 * self.multiplier, 10 * self.multiplier))
 
     def get_cell(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
@@ -71,8 +82,8 @@ class Game:
             print("x, y: ", mpos)
             for x in range(3):
                 for y in range(3):
-                    if mpos[0] >= self.x_start + 100 * x and mpos[0] <= self.x_start + 100 * x + 100:
-                        if mpos[1] >= self.y_start + 100 * y and mpos[1] <= self.y_start + 100 * y + 100:
+                    if mpos[0] >= (self.x_start + self.cell * x) and mpos[0] <= (self.x_start + self.cell * x + self.cell):
+                        if mpos[1] >= (self.y_start + self.cell * y) and mpos[1] <= (self.y_start + self.cell * y + self.cell):
                             print(f"x: {x}, y: {y}, cell: {self.local_board[y][x]}, m_x: {mpos[0]}, m_y: {mpos[1]}")
                             return x, y
         
@@ -114,9 +125,12 @@ class Game:
     def game_logic(self,pos):
         if self.local_board[pos[1]][pos[0]] == 0:
             self.local_board[pos[1]][pos[0]] = self.current_player
+            
             if self.current_player == 1:
+                choice(self.crosses).play()
                 self.current_player = 2
             else:
+                choice(self.circles).play()
                 self.current_player = 1
             print(f"Current player: {self.current_player}")
         else:
@@ -148,9 +162,9 @@ class Game:
 
             self.screen.blit(self.board_empty, (0,0))
 
-            self.screen.blit(text_a, (self.WIDTH // 2 - text_a.get_width() // 2, self.HEIGHT // 2 - 36))
-            self.screen.blit(text_p, (self.WIDTH // 2 - text_p.get_width() // 2, self.HEIGHT // 2 + 36))
-            self.screen.blit(text_q, (self.WIDTH // 2 - text_p.get_width() // 2, self.HEIGHT // 2 + 108))
+            self.screen.blit(text_a, (self.WIDTH // 2 - text_a.get_width() // 2, self.HEIGHT // 2 - (36 * self.multiplier)))
+            self.screen.blit(text_p, (self.WIDTH // 2 - text_p.get_width() // 2, self.HEIGHT // 2 + (36 * self.multiplier)))
+            self.screen.blit(text_q, (self.WIDTH // 2 - text_p.get_width() // 2, self.HEIGHT // 2 + (108 * self.multiplier)))
 
             pygame.display.flip()
     # minmax ai
@@ -248,7 +262,7 @@ class Game:
     def winning_player_screen(self, winning_player):
         text = self.font.render(f"player {winning_player} won... bearly", True, (255,0,0))
         bg_rect = self.board.get_rect()
-        
+        self.impact.play()
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -259,7 +273,7 @@ class Game:
                         print("quitting winning screen")
                         return
             self.screen.blit(self.board_empty, bg_rect)
-            self.screen.blit(text, (self.WIDTH // 2 - text.get_width() // 2, self.HEIGHT - 50  ))
+            self.screen.blit(text, (self.WIDTH // 2 - text.get_width() // 2, self.HEIGHT - (50 * self.multiplier)  ))
             self.screen.blit(self.board_grid, (0, -50))
             self.update_screen(0, -50, winning_player)
             pygame.display.flip()
@@ -267,6 +281,7 @@ class Game:
 
     def main(self):
         app_on = True
+        pygame.mixer.music.play(-1)
         while app_on:
             self.setup_board()
             mode = self.game_menu()
