@@ -53,13 +53,17 @@ class Game:
     def stop_connection(self):
         while self.ongoing:
             try:
-                _, _, exceptional = select.select([self.c1, self.c2], [], [], 0)
-                if exceptional:
-                    print(f"Connection from Player 1 or Player 2 closed. Closing all connections")
-                    self.ongoing = False
+                if self.c1._closed:
                     self.c1.close()
                     self.c2.close()
                     self.server.close()
+                    print("connection from player 1 closed")
+                    break
+                if self.c2._closed:
+                    self.c1.close()
+                    self.c2.close()
+                    self.server.close()
+                    print("connection from player 2 closed")
                     break
             except KeyboardInterrupt:
                 print("Keyboard Interrupt. Closing connection")

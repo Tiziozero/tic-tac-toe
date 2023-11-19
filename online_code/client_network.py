@@ -29,7 +29,10 @@ class Client:
     def stop_connection(self):
         while self.ongoing:
             try:
-                pass
+                if self.client.fileno() == -1:
+                    self.ongoing = False
+                    print("connection quit from server")
+                    break
             except KeyboardInterrupt:
                 print("Keyboard Interrupt. Closing connection")
                 self.ongoing = False
@@ -42,12 +45,15 @@ class Client:
         while self.ongoing:
             if self.ongoing:
                 try:
+                    print("trying")
                     data = self.client.recv(1024)
-                    try:
-                        decoded_data = pickle.loads(data)
-                        print(f"Received: {decoded_data}")
-                    except:
+                    decoded_data = pickle.loads(data)
+                    if decoded_data:
+                        #print(f"Received: {decoded_data}")
                         pass
+                except socket.error:
+                    print("connection closed")
+                    break
                 except (socket.error, ConnectionResetError):
                     print("Connection closed by the server.")
                     self.ongoing = False
@@ -64,6 +70,10 @@ class Client:
                     print(f"ERROR: {str(e)}")
                 except:
                     print("no")
+                finally:
+                    self.client.close()
+                    self.ongoing = False
+                    break
         print("3nd recive thread")
 
     def send(self):
