@@ -70,10 +70,6 @@ class Client:
                     print(f"ERROR: {str(e)}")
                 except:
                     print("no")
-                finally:
-                    self.client.close()
-                    self.ongoing = False
-                    break
         print("3nd recive thread")
 
     def send(self):
