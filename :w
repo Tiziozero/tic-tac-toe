@@ -9,7 +9,7 @@ games = []
 class Server:
     def __init__(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.ip, self.port = 'localhost', 8889
+        self.ip, self.port = 'localhost', 8888
         self.server.bind((self.ip, self.port))
         self.start_server()
 
@@ -82,22 +82,15 @@ class Game:
         return 3, False
 
     def game_logic(self,pos):
-        try:
-            if self.game_board[pos[1]][pos[0]] == 0:
-                if self.turn_player == self.c1:
-                    self.game_board[pos[1]][pos[0]] = 1
-                    self.turn_player = self.c2
-                    return True
-                else:
-                    self.game_board[pos[1]][pos[0]] = 2
-                    self.turn_player = self.c2
-                    return True
+        if self.game_board[pos[1]][pos[0]] == 0:
+            self.game_board[pos[1]][pos[0]] = self.turn_player
+            if self.turn_player == 1:
+                self.turn_player = 2
             else:
-                print("not valid cell")
-                return False
-        except:
-            print("invalid cell")
-            return False
+                self.turn_player = 1
+            print(f"Current player: {self.turn_player}")
+        else:
+            print("not valid cell")
 
 
 
@@ -107,21 +100,16 @@ class Game:
             while self.ongoing:
                 print("cycle")
                 self.send(self.turn_player, self.game_board)
-                pos = self.receive(self.turn_player)
-                # pos = (int(data[0]), int(data[1]))
-                if self.game_logic(pos):
-                    print(f"{self.winning_player} won")
-                    print(self.game_board[0])
-                    print(self.game_board[1])
-                    print(self.game_board[2])
-                    if not self.ongoing:
-                        self.winning_player, self.ongoing = self.check_win(self.game_board)
-                        break
-                    self.changeturn()
+                data = self.receive(self.turn_player)
+                pos = (int(data[0]), int(data[1]))
+                self.winning_player, self.ongoing = self.check_win(self.game_board)
+                if not self.ongoing:
+                    break
+                self.changeturn()
 
-                    print(f"turn player: {self.turn_player}")
-                    print(f"player 1   : {self.c1}")
-                    print(f"player 2   : {self.c2}")
+                print(f"turn player: {self.turn_player}")
+                print(f"player 1   : {self.c1}")
+                print(f"player 2   : {self.c2}")
 
             self.c1.send(pickle.dumps(f"game won"))
             self.c2.send(pickle.dumps(f"game won"))
@@ -175,7 +163,7 @@ class Game:
                     try:
                         data = pickle.loads(data)
                         print(f"received: {str(data):_<50}[]")
-                        return data
+                        return
                     except pickle.PickleError as e:
 
                         print(f"Pickle Error -> {str(e)}")

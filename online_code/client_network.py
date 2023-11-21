@@ -6,8 +6,11 @@ import sys
 class Client:
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.ip, self.port = 'localhost', 8888
+        self.ip, self.port = 'localhost', 8889
+        self.self_player = 0
+        self.winning_player = 0
         self.ongoing = True
+        self.turn_player = 0
         self.connect()
 
     def connect(self):
@@ -33,10 +36,16 @@ class Client:
     def receive(self):
         while self.ongoing:
             try:
-                data = self.client.recv(1024)
+                data = self.client.recv(2048)
                 if data:
                     try:
                         data = pickle.loads(data)
+                        if data == "game won":
+                            data = pickle.loads(self.client.recv(1024))
+                            self.winning_player = int(data)
+                            return self.winning_player
+                        if data == "2_p" or data == "1_p":
+                            self.turn_player = data[0]
                     except pickle.UnpicklingError as e:
                         print("Unpickling Error ->", str(e))
                         continue
@@ -52,16 +61,17 @@ class Client:
     def send(self):
         while self.ongoing:
             try:
-                i = input("enter coords [xy]")
-                x, y = int(i[0]), int(i[1])
-                try:
-                    data = pickle.dumps((x,y))
+                if self.turn_player == self.self_player:
+                    i = input("enter coords [xy]")
+                    x, y = int(i[0]), int(i[1])
                     try:
-                        self.client.send(data)
-                    except socket.error as e:
-                        print(f"Socket error -> {str(e)}")
-                except pickle.PickleError as e:
-                    print(f"picklee error -> {str(e)}")
+                        data = pickle.dumps((x,y))
+                        try:
+                            self.client.send(data)
+                        except socket.error as e:
+                            print(f"Socket error -> {str(e)}")
+                    except pickle.PickleError as e:
+                        print(f"picklee error -> {str(e)}")
             except:
                 print("Invalid input")
 
