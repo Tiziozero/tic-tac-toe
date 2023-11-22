@@ -2,6 +2,8 @@ import pygame
 from enum import Enum
 from random import choice
 import os
+import threading
+import client
 class Game_Type(Enum):
     GAME_TYPE_AI = 1,
     GAME_TYPE_PVP = 2,
@@ -323,6 +325,35 @@ class Game:
         self.winning_player_screen(winning_player)
         return winning_player
     
+    def game_online(self):
+        c = client.TicTacToeClient
+        print("AI")
+        self.local_board = c.board
+        self.current_player = 1
+        bg_rect = self.board.get_rect()
+        game_on = True
+        winning_player = 0
+        while game_on:
+            self.events()
+            winning_player, game_on = self.check_win(self.local_board)
+            if not game_on:
+                break
+            if self.current_player == 2:
+                self.local_board = self.AI(self.local_board) 
+                winning_player, game_on = self.check_win(self.local_board)
+                self.current_player = 1
+                if not game_on:
+                    break
+            self.screen.blit(self.board, bg_rect)
+            self.update_screen()
+            pygame.display.flip()
+        print(f"player {winning_player} won!")
+        self.winning_player_screen(winning_player)
+        return winning_player
+
+
+
+
     def winning_player_screen(self, winning_player):
         if winning_player > 2:
             text = self.font.render(f"Draw", True, (255,0,0))
