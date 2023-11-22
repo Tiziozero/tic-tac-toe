@@ -87,10 +87,14 @@ class Game:
                 if self.turn_player == self.c1:
                     self.game_board[pos[1]][pos[0]] = 1
                     self.turn_player = self.c2
+                    self.c1.send(pickle.dumps(f"2_p"))
+                    self.c2.send(pickle.dumps(f"2_p"))
                     return True
-                else:
+               elif self.turn_player == self.c2:
                     self.game_board[pos[1]][pos[0]] = 2
-                    self.turn_player = self.c2
+                    self.turn_player = self.c1
+                    self.c1.send(pickle.dumps(f"1_p"))
+                    self.c2.send(pickle.dumps(f"1_p"))
                     return True
             else:
                 print("not valid cell")
@@ -102,26 +106,24 @@ class Game:
 
 
     def _game(self):
+        self.c1.send(pickle.dumps("game on"))
+        self.c2.send(pickle.dumps("game on"))
         try:
             self.turn_player = self.c1
             while self.ongoing:
                 print("cycle")
                 self.send(self.turn_player, self.game_board)
                 pos = self.receive(self.turn_player)
-                # pos = (int(data[0]), int(data[1]))
                 if self.game_logic(pos):
                     print(f"{self.winning_player} won")
                     print(self.game_board[0])
                     print(self.game_board[1])
                     print(self.game_board[2])
+                    self.winning_player, self.ongoing = self.check_win(self.game_board)
                     if not self.ongoing:
-                        self.winning_player, self.ongoing = self.check_win(self.game_board)
                         break
-                    self.changeturn()
-
-                    print(f"turn player: {self.turn_player}")
-                    print(f"player 1   : {self.c1}")
-                    print(f"player 2   : {self.c2}")
+                else:
+                    pass
 
             self.c1.send(pickle.dumps(f"game won"))
             self.c2.send(pickle.dumps(f"game won"))
@@ -133,18 +135,19 @@ class Game:
             quit()
 
     def changeturn(self):
-        with self.lock:
-            if self.turn_player == self.c1:
-                self.turn_player = self.c2
-                print("turn player = 2")
-                self.c1.send(pickle.dumps(f"2_p"))
-                self.c2.send(pickle.dumps(f"2_p"))
-                
-            else:
-                self.turn_player = self.c1
-                print("turn player = 1")
-                self.c1.send(pickle.dumps(f"1_p"))
-                self.c2.send(pickle.dumps(f"1_p"))
+        print("Changing turns")
+        if self.turn_player == self.c1:
+            self.turn_player = self.c2
+            print("turn player = 2")
+            self.c1.send(pickle.dumps(f"2_p"))
+            self.c2.send(pickle.dumps(f"2_p"))
+            
+        elif self.turn_player == self.c2:
+            self.turn_player = self.c1
+            print("turn player = 1")
+            self.c1.send(pickle.dumps(f"1_p"))
+            self.c2.send(pickle.dumps(f"1_p"))
+        print(f"                    player = {self.turn_player}")
 
 
     def stop_connection(self):
@@ -153,11 +156,11 @@ class Game:
             pass
 
     def send(self, client, data):
-        with self.lock:
             try:
                 data = pickle.dumps(data)
                 try:
-                    client.send(data)
+                    self.c1.send(data)
+                    self.c2.send(data)
                     return
 
                 except socket.error as e:
@@ -168,7 +171,6 @@ class Game:
 
 
     def receive(self, client):
-        with self.lock:
             try:
                 data = client.recv(1024)
                 if data:
@@ -186,9 +188,11 @@ class Game:
 
     def start(self):
         print("Game started")
-        _game_thread = threading.Thread(target=self._game, args=())
-
-        _game_thread.start()
+        #_game_thread = threading.Thread(target=self._game, args=())
+        #_game_thread.start()
+        self._game()
+        self.c1.close()
+        self.c2.close()
         
 if __name__ == "__main__":
     s = Server()

@@ -19,20 +19,23 @@ class Client:
             print(f"Successfully connected to {self.ip}:{self.port}")
             message = pickle.loads(self.client.recv(1024))
             print(f"Server: {message}")
-            recv_thread = threading.Thread(target=self.test, args=())
-            recv_thread.start()
+            #recv_thread = threading.Thread(target=self.test, args=())
+            #recv_thread.start()
+            self.test()
         except socket.error as e:
             print(f"ERROR: {str(e)}")
 
-    def stop_connection(self):
-        pass
+
     def test(self):
+        tr = threading.Thread(target=self.receive, args=())
+        tr.start()
+        ts = threading.Thread(target=self.send, args=())
+        ts.start()
         try:
-            while True:
-                self.send()
-                self.receive()
+            pass
         except KeyboardInterrupt:
             print("ik")
+
     def receive(self):
         while self.ongoing:
             try:
@@ -43,9 +46,14 @@ class Client:
                         if data == "game won":
                             data = pickle.loads(self.client.recv(1024))
                             self.winning_player = int(data)
-                            return self.winning_player
+                            print(self.winning_player)
+                            return
                         if data == "2_p" or data == "1_p":
                             self.turn_player = data[0]
+                            print(self.turn_player)
+                        else:
+                            print("not won or quit")
+                            print(f"Received: {str(data):_<50}[]")
                     except pickle.UnpicklingError as e:
                         print("Unpickling Error ->", str(e))
                         continue
