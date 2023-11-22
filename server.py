@@ -222,5 +222,5 @@ class TicTacToeGame:
         print(f"         switching players: index = {str(self.index): <3}, index % 2 = {str(self.index % 2): <3}")
 
 if __name__ == "__main__":
-    server = TicTacToeServer("localhost", 5555)
+    server = TicTacToeServer("139.162.200.195", 5555)
 

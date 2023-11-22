@@ -330,7 +330,7 @@ class Game:
         return winning_player
     
     def game_online(self):
-        conn = client.TicTacToeClient('localhost', 5555)
+        conn = client.TicTacToeClient('139.162.200.195', 5555)
         def cust_ev():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
