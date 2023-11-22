@@ -11,7 +11,8 @@ else:
 class Game_Type(Enum):
     GAME_TYPE_AI = 1,
     GAME_TYPE_PVP = 2,
-    GAME_TYPE_QUIT = 3
+    GAME_TYPE_MULTIPLAYER = 3
+    GAME_TYPE_QUIT = 4
 
 class Button:
     def __init__(self, x, y, width, hight, size, font, text, mode):
@@ -185,7 +186,7 @@ class Game:
                         return Game_Type.GAME_TYPE_PVP
                     elif event.key == pygame.K_q:
                         print("Quitting game")
-                        return Game_Type.GAME_TYPE_QUIT
+                        return Game_Type.GAME_TYPE_MULTIPLAYER
 
             self.screen.blit(self.board_empty, (0,0))
 
@@ -203,7 +204,9 @@ class Game:
         menu_buttons.append(button_a)
         button_p = Button(self.WIDTH // 2, self.HEIGHT // 2 + 0 * self.multiplier, 0, 0, 0, self.font, "PvP", Game_Type.GAME_TYPE_PVP)
         menu_buttons.append(button_p)
-        button_q = Button(self.WIDTH // 2, self.HEIGHT // 2 + 75 * self.multiplier, 0, 0, 0, self.font, "Quit", Game_Type.GAME_TYPE_QUIT)
+        button_m = Button(self.WIDTH // 2, self.HEIGHT // 2 + 75 * self.multiplier, 0, 0, 0, self.font, "Multiplayer", Game_Type.GAME_TYPE_MULTIPLAYER)
+        menu_buttons.append(button_m)
+        button_q = Button(self.WIDTH // 2, self.HEIGHT // 2 + 150 * self.multiplier, 0, 0, 0, self.font, "Quit", Game_Type.GAME_TYPE_QUIT)
         menu_buttons.append(button_q)
 
         while True:
@@ -219,9 +222,12 @@ class Game:
                     elif event.key == pygame.K_p:
                         print("PvP mode selected")
                         return Game_Type.GAME_TYPE_PVP
+                    elif event.key == pygame.K_o:
+                        print("Online mode selected")
+                        return Game_Type.GAME_TYPE_ONLINE
                     elif event.key == pygame.K_q:
                         print("Quitting game")
-                        return Game_Type.GAME_TYPE_QUIT
+                        return Game_Type.GAME_TYPE_MULTIPLAYER
                 if event.type == pygame.MOUSEBUTTONUP:
                     mpos = pygame.mouse.get_pos()
                     for button in menu_buttons:
@@ -390,14 +396,16 @@ class Game:
         pygame.mixer.music.play(-1)
         self.setup_board()
         while app_on:
-            print(f"ai: {Game_Type.GAME_TYPE_AI}, pvp: {Game_Type.GAME_TYPE_PVP}, quit: {Game_Type.GAME_TYPE_QUIT}") 
+            print(f"ai: {Game_Type.GAME_TYPE_AI}, pvp: {Game_Type.GAME_TYPE_PVP}, quit: {Game_Type.GAME_TYPE_MULTIPLAYER}") 
             mode = self.game_menu1()
             print(f"mode: {mode}")
             
             if mode == Game_Type.GAME_TYPE_AI:
-                self.game_online() # temp online,, should be ai
+                self.game_ai() # temp online,, should be ai
             elif mode == Game_Type.GAME_TYPE_PVP:
                 self.game_pvp()
+            elif mode == Game_Type.GAME_TYPE_MULTIPLAYER:
+                self.game_online()
             elif mode == Game_Type.GAME_TYPE_QUIT:
                 app_on = False
                 break
