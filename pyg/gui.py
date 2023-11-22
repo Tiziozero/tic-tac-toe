@@ -2,8 +2,12 @@ import pygame
 from enum import Enum
 from random import choice
 import os
+import sys
 import threading
-import client
+if __name__ =='__main__':
+    import client
+else:
+    from pyg import client
 class Game_Type(Enum):
     GAME_TYPE_AI = 1,
     GAME_TYPE_PVP = 2,
@@ -326,29 +330,33 @@ class Game:
         return winning_player
     
     def game_online(self):
-        c = client.TicTacToeClient
-        print("AI")
-        self.local_board = c.board
-        self.current_player = 1
+        conn = client.TicTacToeClient('localhost', 5555)
+        def cust_ev():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    conn.close_conn()
+                    quit()
+                pos = self.get_cell(event)
+                if pos:
+                    conn.send(pos)
+        print("online")
+        self.local_board = conn.return_board()
+        self.current_player = conn.return_player_nuber()
         bg_rect = self.board.get_rect()
         game_on = True
         winning_player = 0
         while game_on:
-            self.events()
-            winning_player, game_on = self.check_win(self.local_board)
-            if not game_on:
-                break
-            if self.current_player == 2:
-                self.local_board = self.AI(self.local_board) 
-                winning_player, game_on = self.check_win(self.local_board)
-                self.current_player = 1
-                if not game_on:
-                    break
+            cust_ev()
+            self.local_board = conn.return_board()
+            game_on = conn.ongoing
             self.screen.blit(self.board, bg_rect)
             self.update_screen()
             pygame.display.flip()
-        print(f"player {winning_player} won!")
-        self.winning_player_screen(winning_player)
+            game_on = conn.ongoing
+            if conn.wp != 0:
+                break
+        print(f"player {conn.wp} won!")
+        self.winning_player_screen(int(conn.wp))
         return winning_player
 
 
@@ -387,7 +395,7 @@ class Game:
             print(f"mode: {mode}")
             
             if mode == Game_Type.GAME_TYPE_AI:
-                self.game_ai()
+                self.game_online() # temp online,, should be ai
             elif mode == Game_Type.GAME_TYPE_PVP:
                 self.game_pvp()
             elif mode == Game_Type.GAME_TYPE_QUIT:
