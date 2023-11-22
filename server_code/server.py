@@ -90,7 +90,7 @@ class Game:
                     self.c1.send(pickle.dumps(f"2_p"))
                     self.c2.send(pickle.dumps(f"2_p"))
                     return True
-               elif self.turn_player == self.c2:
+                elif self.turn_player == self.c2:
                     self.game_board[pos[1]][pos[0]] = 2
                     self.turn_player = self.c1
                     self.c1.send(pickle.dumps(f"1_p"))
@@ -115,7 +115,7 @@ class Game:
                 self.send(self.turn_player, self.game_board)
                 pos = self.receive(self.turn_player)
                 if self.game_logic(pos):
-                    print(f"{self.winning_player} won")
+                    #print(f"{self.winning_player} won")
                     print(self.game_board[0])
                     print(self.game_board[1])
                     print(self.game_board[2])
@@ -133,6 +133,8 @@ class Game:
         except KeyboardInterrupt:
             print("ki")
             quit()
+        except:
+            print("Error")
 
     def changeturn(self):
         print("Changing turns")

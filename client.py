@@ -12,9 +12,25 @@ class TicTacToeClient:
     def run(self):
         while True:
             try:
-                self.client_socket.send(pickle.dumps(input("input: ")))
+                inp = input("input: ")
+                if inp == 'quit':
+                    break
+                else:    
+                    self.client_socket.send(pickle.dumps(inp))
+            except KeyboardInterrupt:
+                break
             except:
-                pass
+                print("error")
+                break
+    def rec(self):
+        while True:
+            try:
+                data = pickle.loads(self.client_socket.recv(1024))
+                print(f"data: {str(data):_<50}")
+            except:
+                break
+
+
 
 if __name__ == "__main__":
     client = TicTacToeClient("localhost", 5555)

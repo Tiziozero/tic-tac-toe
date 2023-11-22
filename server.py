@@ -3,32 +3,41 @@ import threading
 import pickle
 
 class TicTacToeServer:
-    def __init__(self, host, port):
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind((host, port))
-        self.server_socket.listen(2)
+    def __init__(self, ip, port):
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.ip, self.port = ip, port
+        self.server.bind((self.ip, self.port))
+        self.start_server()
+        self.games = []
 
-        print(f"Server is listening on {host}:{port}")
+    def start_server(self):
+        game_id = 0
+        self.server.listen()
+        print(f"Server listening on {self.ip}:{self.port}")
+        try:
+            while True:
+                # Wait for a connection
+                client, address = self.server.accept()
+                client_2, address_2 = self.server.accept()
 
-        self.clients = []
-        self.games = {}
+                try:
+                    print(f"Connection from {address}, {address_2}")
 
-        self.accept_connections()
+                    # Send a welcome message to the client
+                    message = "Hello, World!"
+                    client.sendall(pickle.dumps(message))
+                    client_2.sendall(pickle.dumps(message))
 
-    def accept_connections(self):
-        while True:
-            client_socket, client_address = self.server_socket.accept()
-            print(f"Accepted connection from {client_address}")
-            client_socket1, client_address1 = self.server_socket.accept()
-            print(f"Accepted connection from {client_address1}")
-            self.start_game(110, client_socket, client_socket1)
-
-
-
-    def start_game(self, game_id, client1, client2):
-        game = TicTacToeGame(game_id, client1, client2)
-        self.games[game_id] = game
-        game.func()
+                    # Start a new game
+                    game = TicTacToeGame(game_id, client, client_2)
+                    game.func()
+                    self.games.append(game)
+                    game_id += 1
+                except:
+                    print("Error handling client connection")
+                
+        except KeyboardInterrupt:
+            print("Server closed")
 
 class TicTacToeGame:
     def __init__(self, game_id, client1, client2):
@@ -42,9 +51,9 @@ class TicTacToeGame:
     def func(self):
         while True:
             try:
-                data = pickle.loads(self.players[self.current_player].recv(1024))
+                data = pickle.loads(self.current_player.recv(1024))
                 if data:
-                    print("data")
+                    print(f"data: {str(data):_<50}")
                     self.switch_player()
             except:
                 pass
