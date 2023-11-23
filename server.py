@@ -203,8 +203,8 @@ class TicTacToeGame:
                 pass
         print("Closing server")
         print(f"{self.wp} won")
-        self.c1.send(pickle.dumps(self.board))
-        self.c2.send(pickle.dumps(self.board))
+        #self.c1.send(pickle.dumps(self.board))
+        #self.c2.send(pickle.dumps(self.board))
         if self.wp == 1:
             self.c1.send(pickle.dumps(f"quit1"))
             self.c2.send(pickle.dumps(f"quit1"))

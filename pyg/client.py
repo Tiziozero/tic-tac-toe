@@ -88,6 +88,7 @@ class TicTacToeClient:
                     self.wp = int(data[4])
                     self.ongoing = False
                     print("break, quit")
+                    print(f"ongoing === {str(self.ongoing)}, wp = {str(self.wp)}")
                     break
 
             except:
@@ -128,7 +129,9 @@ class TicTacToeClient:
                         quit()
 
             except:
+                print("Exception")
                 break
+        self.ongoing = False
         print(f"ongoing = {self.ongoing}, wp = {self.wp}")
 
 
