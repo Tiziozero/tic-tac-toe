@@ -212,6 +212,8 @@ class TicTacToeGame:
         elif self.wp == 3:
             self.c1.send(pickle.dumps(f"quit3"))
             self.c2.send(pickle.dumps(f"quit3"))
+        self.c1.send(pickle.dumps(self.board))
+        self.c2.send(pickle.dumps(self.board))
         self.c1.close()
         self.c2.close()
 

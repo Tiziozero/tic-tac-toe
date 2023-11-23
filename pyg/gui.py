@@ -343,7 +343,7 @@ class Game:
                     conn.close_conn()
                     quit()
                 pos = self.get_cell(event)
-                if pos:
+                if pos and conn.ready:
                     conn.send(pos)
         print("online")
         self.local_board = conn.return_board()
@@ -351,9 +351,15 @@ class Game:
         bg_rect = self.board.get_rect()
         game_on = True
         winning_player = 0
-        while game_on:
+        while not conn.ready:
             cust_ev()
+            game_on = conn.ongoing
+            self.screen.blit(self.board, bg_rect)
+            self.update_screen()
+        while game_on:
+            self.current_player = conn.return_player_nuber()
             self.local_board = conn.return_board()
+            cust_ev()
             game_on = conn.ongoing
             self.screen.blit(self.board, bg_rect)
             self.update_screen()

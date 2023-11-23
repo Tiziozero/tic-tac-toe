@@ -6,18 +6,19 @@ import sys
 class TicTacToeClient:
     def __init__(self, host, port ):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect((host, port))
+        self.host, self.port = host, port
         self.player_number = None
         self.board = [[0,0,0],[0,0,0],[0,0,0]]
         self.lock = threading.Lock()
-        self.player_number = pickle.loads(self.client_socket.recv(1024))
         self.ongoing = True
         self.wp = 0
+        self.ready = False
+        self.rthread = threading.Thread(target=self.rec, args=())
+        conthread = threading.Thread(target=self.setup, args=())
+        conthread.start()
+        #conthread.join()
         print(f"player number: {self.player_number}")
-        self.setup()
 
-        rthread = threading.Thread(target=self.rec, args=())
-        rthread.start()
         # self.run()
 
     def close_conn(self):
@@ -30,8 +31,12 @@ class TicTacToeClient:
         return self.player_number
 
     def setup(self):
-        pass
-        #self.player_number = pickle.loads(self.client_socket.recv(1024))
+        self.client_socket.connect((self.host, self.port))
+        self.player_number = pickle.loads(self.client_socket.recv(1024))
+        self.ready = True
+        print("========================done setup========================")
+        self.rthread.start()
+        print("==================receive thread started==================")
 
     
     def run(self):
