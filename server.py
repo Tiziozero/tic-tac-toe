@@ -203,6 +203,8 @@ class TicTacToeGame:
                 pass
         print("Closing server")
         print(f"{self.wp} won")
+        self.c1.send(pickle.dumps(self.board))
+        self.c2.send(pickle.dumps(self.board))
         if self.wp == 1:
             self.c1.send(pickle.dumps(f"quit1"))
             self.c2.send(pickle.dumps(f"quit1"))
@@ -212,8 +214,6 @@ class TicTacToeGame:
         elif self.wp == 3:
             self.c1.send(pickle.dumps(f"quit3"))
             self.c2.send(pickle.dumps(f"quit3"))
-        self.c1.send(pickle.dumps(self.board))
-        self.c2.send(pickle.dumps(self.board))
         self.c1.close()
         self.c2.close()
 
