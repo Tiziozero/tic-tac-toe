@@ -43,6 +43,9 @@ class TicTacToeServer:
                 
         except KeyboardInterrupt:
             print("Server closed")
+            self.server.close()
+            for game in self.games:
+                game.ongoing = False
 
 class TicTacToeGame:
     def __init__(self, game_id, client1, client2):
