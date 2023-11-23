@@ -367,6 +367,7 @@ class Game:
             game_on = conn.ongoing
             if conn.wp != 0:
                 break
+        self.local_board = conn.board
         print(f"player {conn.wp} won!")
         self.winning_player_screen(int(conn.wp))
         return winning_player
